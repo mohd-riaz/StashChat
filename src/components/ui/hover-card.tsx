@@ -5,8 +5,10 @@ import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card
 import { cn } from "@/lib/utils"
 
 function HoverCard({
-  openDelay: _openDelay,
-  closeDelay: _closeDelay,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  openDelay,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  closeDelay,
   ...props
 }: PreviewCardPrimitive.Root.Props & { openDelay?: number; closeDelay?: number }) {
   return <PreviewCardPrimitive.Root data-slot="hover-card" {...props} />

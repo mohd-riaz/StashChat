@@ -21,6 +21,7 @@ if (typeof globalThis.OffscreenCanvas === 'undefined') {
 }
 
 if (typeof globalThis.createImageBitmap === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (globalThis as unknown as Record<string, unknown>).createImageBitmap = async (_blob: Blob) => ({
     width: 1024,
     height: 768,

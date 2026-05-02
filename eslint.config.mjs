@@ -12,7 +12,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Scaffolded third-party component source — not our code to lint
+    "src/components/ui/**",
+    "src/components/ai-elements/**",
   ]),
+  {
+    rules: {
+      'react/no-danger': 'error',
+    },
+  },
 ]);
 
 export default eslintConfig;
