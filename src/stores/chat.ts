@@ -4,7 +4,6 @@ import * as messagesRepo from '@/lib/db/messages';
 import type { Conversation, Message, ToolConfig } from '@/lib/db/schema';
 
 export type KeyState = 'unknown' | 'configured' | 'unconfigured';
-export type ThemeMode = 'light' | 'dark' | 'system';
 
 export class SaveKeyError extends Error {
   constructor(public readonly code: string, message?: string) {
@@ -18,7 +17,6 @@ const NO_TOOLS: ToolConfig = { webSearch: false, urlFetch: false };
 
 const LS = {
   defaultModel: 'stashchat:default-model',
-  theme: 'stashchat:theme',
   toolConfig: 'stashchat:tool-config',
 } as const;
 
@@ -27,7 +25,6 @@ export interface ChatState {
   activeId: string | null;
   keyState: KeyState;
   defaultModel: string;
-  theme: ThemeMode;
   toolConfig: ToolConfig;
 
   hydrate: () => Promise<void>;
@@ -41,7 +38,6 @@ export interface ChatState {
   deleteConversation: (id: string) => Promise<void>;
 
   setDefaultModel: (m: string) => void;
-  setTheme: (t: ThemeMode) => void;
   setToolConfig: (cfg: ToolConfig) => void;
   setConversationModel: (id: string, model: string | undefined) => Promise<void>;
   setConversationToolConfig: (id: string, cfg: ToolConfig | undefined) => Promise<void>;
@@ -55,7 +51,6 @@ const initial = {
   activeId: null as string | null,
   keyState: 'unknown' as KeyState,
   defaultModel: DEFAULT_MODEL_FALLBACK,
-  theme: 'system' as ThemeMode,
   toolConfig: NO_TOOLS,
 };
 
@@ -78,13 +73,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
   hydrate: async () => {
     const conversations = await conversationsRepo.list();
     let defaultModel = DEFAULT_MODEL_FALLBACK;
-    let theme: ThemeMode = 'system';
     if (typeof localStorage !== 'undefined') {
       defaultModel = localStorage.getItem(LS.defaultModel) ?? DEFAULT_MODEL_FALLBACK;
-      const t = localStorage.getItem(LS.theme);
-      if (t === 'light' || t === 'dark' || t === 'system') theme = t;
     }
-    set({ conversations, defaultModel, theme, toolConfig: readToolConfig() });
+    set({ conversations, defaultModel, toolConfig: readToolConfig() });
   },
 
   refreshKeyStatus: async () => {
@@ -149,11 +141,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setDefaultModel: (m) => {
     set({ defaultModel: m });
     if (typeof localStorage !== 'undefined') localStorage.setItem(LS.defaultModel, m);
-  },
-
-  setTheme: (t) => {
-    set({ theme: t });
-    if (typeof localStorage !== 'undefined') localStorage.setItem(LS.theme, t);
   },
 
   setToolConfig: (cfg) => {

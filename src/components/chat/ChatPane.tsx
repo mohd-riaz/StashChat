@@ -13,8 +13,8 @@ import type { Part } from '@/lib/db/schema';
 import { deriveContentSummary } from '@/lib/db/contentSummary';
 
 export function ChatPane({
-  onOpenSettings, onOpenSidebar,
-}: { onOpenSettings: () => void; onOpenSidebar?: () => void }) {
+  onOpenSettings,
+}: { onOpenSettings: () => void }) {
   const activeId = useChatStore((s) => s.activeId);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,7 +73,7 @@ export function ChatPane({
 
   return (
     <div className="flex flex-1 flex-col h-dvh">
-      <ChatHeader onOpenSettings={onOpenSettings} onOpenSidebar={onOpenSidebar} />
+      <ChatHeader onOpenSettings={onOpenSettings} />
       <MessageList messages={storedMessages} streaming={streaming} />
       <Composer status={status} onSubmit={onSubmit} onStop={stop} />
     </div>

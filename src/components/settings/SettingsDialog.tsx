@@ -10,16 +10,17 @@ import { KeyPanel } from './KeyPanel';
 import { ModelPanel } from './ModelPanel';
 import { ToolsPanel } from './ToolsPanel';
 import { useChatStore } from '@/stores/chat';
+import { useTheme } from 'next-themes';
 
 export function SettingsDialog({
   open, onClose,
 }: { open: boolean; onClose: () => void }) {
-  const theme = useChatStore((s) => s.theme);
   const saveKey = useChatStore((s) => s.saveKey);
   const forgetKey = useChatStore((s) => s.forgetKey);
-  const setTheme = useChatStore((s) => s.setTheme);
 
   const onForget = async () => { await forgetKey(); onClose(); };
+
+  const {theme, setTheme} = useTheme()
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -44,10 +45,10 @@ export function SettingsDialog({
               {(['light', 'dark', 'system'] as const).map((t) => (
                 <Button
                   key={t}
-                  variant={theme === t ? 'default' : 'outline'}
+                  variant={t===theme ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setTheme(t)}
                   className="capitalize"
+                  onClick={()=>setTheme(t)}
                 >
                   {t}
                 </Button>

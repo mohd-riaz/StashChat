@@ -3,15 +3,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Settings as SettingsIcon, PanelLeft } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Settings as SettingsIcon } from 'lucide-react';
 import { useChatStore } from '@/stores/chat';
 
 export interface ChatHeaderProps {
   onOpenSettings: () => void;
-  onOpenSidebar?: () => void;
 }
 
-export function ChatHeader({ onOpenSettings, onOpenSidebar }: ChatHeaderProps) {
+export function ChatHeader({ onOpenSettings }: ChatHeaderProps) {
   const activeId = useChatStore((s) => s.activeId);
   const conversations = useChatStore((s) => s.conversations);
   const rename = useChatStore((s) => s.renameConversation);
@@ -30,17 +30,7 @@ export function ChatHeader({ onOpenSettings, onOpenSidebar }: ChatHeaderProps) {
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b px-3 gap-2">
       <div className="flex items-center gap-1.5 flex-1 min-w-0">
-        {onOpenSidebar && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden size-8 shrink-0"
-            onClick={onOpenSidebar}
-            aria-label="Open sidebar"
-          >
-            <PanelLeft className="size-4" />
-          </Button>
-        )}
+        <SidebarTrigger size="icon" className="shrink-0" />
         {conv ? (
           editing ? (
             <Input

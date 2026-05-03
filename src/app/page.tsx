@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useChatStore } from '@/stores/chat';
-import { Sidebar } from '@/components/sidebar/Sidebar';
+import { AppSidebar } from '@/components/sidebar/Sidebar';
 import { ChatPane } from '@/components/chat/ChatPane';
 import { SettingsDialog } from '@/components/settings/SettingsDialog';
 import { SetupScreen } from '@/components/setup/SetupScreen';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Toaster, toast } from 'sonner';
 
 export default function Home() {
@@ -28,7 +28,6 @@ export default function Home() {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [renameTarget, setRenameTarget] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     void hydrate();
@@ -77,32 +76,19 @@ export default function Home() {
     setPendingDelete(null);
   };
 
-  const sidebar = (
-    <Sidebar
-      conversations={conversations}
-      activeId={activeId}
-      onSelect={(id) => { void setActive(id); setSidebarOpen(false); }}
-      onNew={() => { void newConversation(); setSidebarOpen(false); }}
-      onRename={handleRename}
-      onDelete={(id) => setPendingDelete(id)}
-    />
-  );
-
   return (
-    <div className="flex h-dvh w-full">
-      <div className="hidden md:block">{sidebar}</div>
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-72">
-          {sidebar}
-        </SheetContent>
-      </Sheet>
-
-      <main className="flex flex-1 min-w-0">
-        <ChatPane
-          onOpenSettings={() => setSettingsOpen(true)}
-          onOpenSidebar={() => setSidebarOpen(true)}
-        />
-      </main>
+    <SidebarProvider>
+      <AppSidebar
+        conversations={conversations}
+        activeId={activeId}
+        onSelect={(id) => { void setActive(id); }}
+        onNew={() => { void newConversation(); }}
+        onRename={handleRename}
+        onDelete={(id) => setPendingDelete(id)}
+      />
+      <SidebarInset className="flex flex-col h-dvh overflow-hidden">
+        <ChatPane onOpenSettings={() => setSettingsOpen(true)} />
+      </SidebarInset>
 
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
@@ -143,6 +129,6 @@ export default function Home() {
       )}
 
       <Toaster richColors position="top-center" />
-    </div>
+    </SidebarProvider>
   );
 }

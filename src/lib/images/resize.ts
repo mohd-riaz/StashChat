@@ -1,5 +1,16 @@
 import { blobToDataUrl } from './blobToDataUrl';
 
+function dataUrlToBlob(dataUrl: string): Blob {
+  const comma = dataUrl.indexOf(',');
+  const header = dataUrl.slice(0, comma);
+  const base64 = dataUrl.slice(comma + 1);
+  const mimeType = header.match(/:(.*?);/)?.[1] ?? 'application/octet-stream';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mimeType });
+}
+
 const MAX_EDGE = 2048;
 const QUALITY = 0.85;
 const MAX_RAW_FILE = 25 * 1024 * 1024;
@@ -30,8 +41,9 @@ function hasAlpha(
 }
 
 export async function resizeDataUrl(dataUrl: string): Promise<PreparedImage> {
-  const res = await fetch(dataUrl);
-  const blob = await res.blob();
+  const blob = dataUrl.startsWith('data:')
+    ? dataUrlToBlob(dataUrl)
+    : await fetch(dataUrl).then((r) => r.blob());
   if (!blob.type.startsWith('image/')) throw new Error('Not an image');
   if (blob.size > MAX_RAW_FILE) throw new Error('File too large (>25 MB)');
 

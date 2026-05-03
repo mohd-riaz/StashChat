@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { SidebarMenuButton, SidebarMenuAction } from '@/components/ui/sidebar';
 import { MoreHorizontal } from 'lucide-react';
 import type { Conversation } from '@/lib/db/schema';
 
@@ -16,33 +16,21 @@ export function ConversationItem({
   onRename: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
-
   return (
-    <div
-      className={`group flex items-center rounded-md transition-colors ${
-        active
-          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-          : 'hover:bg-sidebar-accent/50 text-sidebar-foreground'
-      }`}
-    >
-      <button
-        type="button"
+    <>
+      <SidebarMenuButton
+        isActive={active}
         onClick={() => onSelect(conv.id)}
-        className="flex-1 truncate text-left px-2 py-2 text-sm leading-tight"
+        tooltip={conv.title}
       >
-        {conv.title}
-      </button>
+        <span>{conv.title}</span>
+      </SidebarMenuButton>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 mr-1 opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0"
-              aria-label="More options"
-            >
+            <SidebarMenuAction showOnHover aria-label="More options">
               <MoreHorizontal className="size-3.5" />
-            </Button>
+            </SidebarMenuAction>
           }
         />
         <DropdownMenuContent align="end">
@@ -55,6 +43,6 @@ export function ConversationItem({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
+    </>
   );
 }

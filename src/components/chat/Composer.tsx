@@ -1,16 +1,12 @@
 'use client';
 
 import type { ChatStatus } from 'ai';
-import { Globe, Link } from 'lucide-react';
+import { Globe, ImageIcon, Link } from 'lucide-react';
 import {
   PromptInput,
   PromptInputTextarea,
   PromptInputFooter,
   PromptInputSubmit,
-  PromptInputActionMenu,
-  PromptInputActionMenuTrigger,
-  PromptInputActionMenuContent,
-  PromptInputActionAddAttachments,
   PromptInputHeader,
   PromptInputButton,
   usePromptInputAttachments,
@@ -27,6 +23,15 @@ import { resizeDataUrl, MAX_PER_MESSAGE } from '@/lib/images/resize';
 import { useChatStore } from '@/stores/chat';
 import { ModelPicker } from './ModelPicker';
 import type { Part } from '@/lib/db/schema';
+
+function AddImageButton() {
+  const { openFileDialog } = usePromptInputAttachments();
+  return (
+    <PromptInputButton tooltip="Add image" onClick={openFileDialog}>
+      <ImageIcon className="size-4" />
+    </PromptInputButton>
+  );
+}
 
 function AttachmentPreviewRow() {
   const { files, remove } = usePromptInputAttachments();
@@ -118,12 +123,7 @@ export function Composer({ status, onSubmit, onStop }: ComposerProps) {
         <PromptInputTextarea placeholder="Message StashChat…" />
         <PromptInputFooter>
           <div className="flex items-center gap-0.5">
-            <PromptInputActionMenu>
-              <PromptInputActionMenuTrigger />
-              <PromptInputActionMenuContent>
-                <PromptInputActionAddAttachments label="Add image" />
-              </PromptInputActionMenuContent>
-            </PromptInputActionMenu>
+            <AddImageButton />
             <PromptInputButton
               tooltip="Web search"
               onClick={toggleWebSearch}
