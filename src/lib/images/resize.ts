@@ -29,6 +29,37 @@ function hasAlpha(
   return false;
 }
 
+export async function resizeDataUrl(dataUrl: string): Promise<PreparedImage> {
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+  if (!blob.type.startsWith('image/')) throw new Error('Not an image');
+  if (blob.size > MAX_RAW_FILE) throw new Error('File too large (>25 MB)');
+
+  const bitmap = await createImageBitmap(blob);
+  const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+  const w = Math.max(1, Math.round(bitmap.width * scale));
+  const h = Math.max(1, Math.round(bitmap.height * scale));
+
+  const canvas = new OffscreenCanvas(w, h);
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(bitmap as unknown as CanvasImageSource, 0, 0, w, h);
+
+  const useJpeg = blob.type !== 'image/png' || !hasAlpha(ctx as never, w, h);
+  const outputBlob = await canvas.convertToBlob({
+    type: useJpeg ? 'image/jpeg' : 'image/png',
+    quality: useJpeg ? QUALITY : undefined,
+  });
+
+  return {
+    dataUrl: await blobToDataUrl(outputBlob),
+    mimeType: useJpeg ? 'image/jpeg' : 'image/png',
+    width: w,
+    height: h,
+    originalBytes: blob.size,
+    resizedBytes: outputBlob.size,
+  };
+}
+
 export async function prepareImage(file: File): Promise<PreparedImage> {
   if (!file.type.startsWith('image/')) throw new Error('Not an image file');
   if (file.size > MAX_RAW_FILE) throw new Error('File too large (>25 MB)');

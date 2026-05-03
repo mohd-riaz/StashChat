@@ -1,65 +1,148 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useChatStore } from '@/stores/chat';
+import { Sidebar } from '@/components/sidebar/Sidebar';
+import { ChatPane } from '@/components/chat/ChatPane';
+import { SettingsDialog } from '@/components/settings/SettingsDialog';
+import { SetupScreen } from '@/components/setup/SetupScreen';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Toaster, toast } from 'sonner';
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+  const conversations = useChatStore((s) => s.conversations);
+  const activeId = useChatStore((s) => s.activeId);
+  const keyState = useChatStore((s) => s.keyState);
+  const hydrate = useChatStore((s) => s.hydrate);
+  const refreshKeyStatus = useChatStore((s) => s.refreshKeyStatus);
+  const setActive = useChatStore((s) => s.setActive);
+  const newConversation = useChatStore((s) => s.newConversation);
+  const renameConversation = useChatStore((s) => s.renameConversation);
+  const deleteConversation = useChatStore((s) => s.deleteConversation);
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [renameTarget, setRenameTarget] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    void hydrate();
+    void refreshKeyStatus();
+  }, [hydrate, refreshKeyStatus]);
+
+  if (keyState === 'unknown') {
+    return (
+      <main className="min-h-dvh grid place-items-center">
+        <div className="text-sm text-muted-foreground">Loading…</div>
       </main>
+    );
+  }
+
+  if (keyState === 'unconfigured') {
+    return (
+      <>
+        <SetupScreen />
+        <Toaster richColors position="top-center" />
+      </>
+    );
+  }
+
+  const handleRename = (id: string) => {
+    const conv = conversations.find((c) => c.id === id);
+    setRenameDraft(conv?.title ?? '');
+    setRenameTarget(id);
+  };
+
+  const submitRename = async () => {
+    if (renameTarget && renameDraft.trim()) {
+      await renameConversation(renameTarget, renameDraft.trim());
+    }
+    setRenameTarget(null);
+  };
+
+  const submitDelete = async () => {
+    if (pendingDelete) {
+      try {
+        await deleteConversation(pendingDelete);
+        toast.success('Conversation deleted');
+      } catch {
+        toast.error('Failed to delete conversation');
+      }
+    }
+    setPendingDelete(null);
+  };
+
+  const sidebar = (
+    <Sidebar
+      conversations={conversations}
+      activeId={activeId}
+      onSelect={(id) => { void setActive(id); setSidebarOpen(false); }}
+      onNew={() => { void newConversation(); setSidebarOpen(false); }}
+      onRename={handleRename}
+      onDelete={(id) => setPendingDelete(id)}
+    />
+  );
+
+  return (
+    <div className="flex h-dvh w-full">
+      <div className="hidden md:block">{sidebar}</div>
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-72">
+          {sidebar}
+        </SheetContent>
+      </Sheet>
+
+      <main className="flex flex-1 min-w-0">
+        <ChatPane
+          onOpenSettings={() => setSettingsOpen(true)}
+          onOpenSidebar={() => setSidebarOpen(true)}
+        />
+      </main>
+
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o: boolean) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the conversation and its messages from your browser.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={submitDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {renameTarget && (
+        <AlertDialog open onOpenChange={(o: boolean) => !o && setRenameTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Rename conversation</AlertDialogTitle>
+            </AlertDialogHeader>
+            <input
+              className="w-full border rounded px-2 py-1"
+              value={renameDraft}
+              onChange={(e) => setRenameDraft(e.target.value)}
+              autoFocus
+              aria-label="New title"
+            />
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setRenameTarget(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={submitRename}>Save</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      <Toaster richColors position="top-center" />
     </div>
   );
 }

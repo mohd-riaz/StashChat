@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const PartSchema = z.discriminatedUnion('type', [
+const PartSchema = z.union([
   z.object({ type: z.literal('text'), text: z.string().max(64_000) }),
   z.object({
     type: z.literal('image'),
@@ -22,6 +22,8 @@ const PartSchema = z.discriminatedUnion('type', [
     output: z.unknown(),
     isError: z.boolean().optional(),
   }),
+  // Passthrough for AI SDK parts (step-start, reasoning, source, tool-invocation, etc.)
+  z.object({ type: z.string() }).passthrough(),
 ]);
 
 const MessageSchema = z.object({

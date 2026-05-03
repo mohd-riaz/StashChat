@@ -43,6 +43,7 @@ export interface ChatState {
   setDefaultModel: (m: string) => void;
   setTheme: (t: ThemeMode) => void;
   setToolConfig: (cfg: ToolConfig) => void;
+  setConversationModel: (id: string, model: string | undefined) => Promise<void>;
   setConversationToolConfig: (id: string, cfg: ToolConfig | undefined) => Promise<void>;
 
   resolveModel: (conversationId: string | null, override?: string) => string;
@@ -158,6 +159,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setToolConfig: (cfg) => {
     set({ toolConfig: cfg });
     if (typeof localStorage !== 'undefined') localStorage.setItem(LS.toolConfig, JSON.stringify(cfg));
+  },
+
+  setConversationModel: async (id, model) => {
+    await conversationsRepo.setDefaultModel(id, model);
+    set({ conversations: await conversationsRepo.list() });
   },
 
   setConversationToolConfig: async (id, cfg) => {

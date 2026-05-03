@@ -52,6 +52,17 @@ export async function remove(id: string): Promise<void> {
   await tx.done;
 }
 
+export async function setDefaultModel(id: string, model: string | undefined): Promise<void> {
+  const db = await openDb();
+  const tx = db.transaction('conversations', 'readwrite');
+  const row = (await tx.store.get(id)) as Conversation | undefined;
+  if (!row) return;
+  if (model === undefined) delete row.defaultModel;
+  else row.defaultModel = model;
+  await tx.store.put(row);
+  await tx.done;
+}
+
 export async function setDefaultToolConfig(id: string, cfg: ToolConfig | undefined): Promise<void> {
   const db = await openDb();
   const tx = db.transaction('conversations', 'readwrite');
