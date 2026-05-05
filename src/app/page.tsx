@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useChatStore } from '@/stores/chat';
 import { AppSidebar } from '@/components/sidebar/Sidebar';
 import { ChatPane } from '@/components/chat/ChatPane';
@@ -28,11 +29,37 @@ export default function Home() {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [renameTarget, setRenameTarget] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
+  const [hydrated, setHydrated] = useState(false);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialSyncDone = useRef(false);
 
   useEffect(() => {
-    void hydrate();
+    void hydrate().then(() => setHydrated(true));
     void refreshKeyStatus();
   }, [hydrate, refreshKeyStatus]);
+
+  // URL → store: once after hydration, adopt ?c=<id> if it points to a real conversation.
+  useEffect(() => {
+    if (initialSyncDone.current || !hydrated) return;
+    const urlId = searchParams.get('c');
+    if (urlId && conversations.some((c) => c.id === urlId)) {
+      void setActive(urlId);
+    }
+    initialSyncDone.current = true;
+  }, [hydrated, conversations, searchParams, setActive]);
+
+  // store → URL: keep ?c=<id> in sync with activeId after initial sync.
+  useEffect(() => {
+    if (!initialSyncDone.current) return;
+    const current = searchParams.get('c');
+    if (activeId && current !== activeId) {
+      router.replace(`?c=${activeId}`);
+    } else if (!activeId && current) {
+      router.replace('/');
+    }
+  }, [activeId, searchParams, router]);
 
   if (keyState === 'unknown') {
     return (
@@ -107,8 +134,7 @@ export default function Home() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {renameTarget && (
-        <AlertDialog open onOpenChange={(o: boolean) => !o && setRenameTarget(null)}>
+        <AlertDialog open={!!renameTarget} onOpenChange={(o: boolean) => !o && setRenameTarget(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Rename conversation</AlertDialogTitle>
@@ -126,7 +152,6 @@ export default function Home() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      )}
 
       <Toaster richColors position="top-center" />
     </SidebarProvider>

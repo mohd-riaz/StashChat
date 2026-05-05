@@ -107,7 +107,7 @@ function SidebarContents({ conversations, activeId, onSelect, onNew, onRename, o
   return (
     <>
       <SidebarHeader className="gap-2 p-2">
-        <SidebarMenuButton tooltip="New chat" className="font-normal pointer-events-none">
+        <SidebarMenuButton tooltip="New chat" className="font-medium pointer-events-none">
           <Bot className="size-4 shrink-0" />
           <span>StashChat</span>
         </SidebarMenuButton>
