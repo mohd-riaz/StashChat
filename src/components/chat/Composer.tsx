@@ -59,15 +59,17 @@ export interface ComposerProps {
 
 export function Composer({ status, onSubmit, onStop }: ComposerProps) {
   const activeId = useChatStore((s) => s.activeId);
-  const resolveModel = useChatStore((s) => s.resolveModel);
-  const resolveToolConfig = useChatStore((s) => s.resolveToolConfig);
+  const conversations = useChatStore((s) => s.conversations);
+  const defaultModel = useChatStore((s) => s.defaultModel);
+  const globalToolConfig = useChatStore((s) => s.toolConfig);
   const setConversationModel = useChatStore((s) => s.setConversationModel);
   const setDefaultModel = useChatStore((s) => s.setDefaultModel);
   const setConversationToolConfig = useChatStore((s) => s.setConversationToolConfig);
   const setToolConfig = useChatStore((s) => s.setToolConfig);
 
-  const currentModel = resolveModel(activeId);
-  const toolConfig = resolveToolConfig(activeId);
+  const activeConv = activeId ? conversations.find((c) => c.id === activeId) : undefined;
+  const currentModel = activeConv?.defaultModel ?? defaultModel;
+  const toolConfig = activeConv?.defaultToolConfig ?? globalToolConfig;
 
   const handleModelSelect = (modelId: string) => {
     if (activeId) {
@@ -125,20 +127,20 @@ export function Composer({ status, onSubmit, onStop }: ComposerProps) {
           <div className="flex items-center gap-0.5">
             <AddImageButton />
             <PromptInputButton
-              tooltip="Web search"
-              onClick={toggleWebSearch}
-              className={toolConfig.webSearch ? 'text-primary bg-muted dark:bg-muted/50' : ''}
-              aria-pressed={toolConfig.webSearch}
-            >
-              <Globe className="size-4" />
-            </PromptInputButton>
-            <PromptInputButton
               tooltip="URL fetch"
               onClick={toggleUrlFetch}
               className={toolConfig.urlFetch ? 'text-primary bg-muted dark:bg-muted/50' : ''}
               aria-pressed={toolConfig.urlFetch}
             >
               <Link className="size-4" />
+            </PromptInputButton>
+            <PromptInputButton
+              tooltip="Web search"
+              onClick={toggleWebSearch}
+              className={toolConfig.webSearch ? 'text-primary bg-muted dark:bg-muted/50' : ''}
+              aria-pressed={toolConfig.webSearch}
+            >
+              <Globe className="size-4" />
             </PromptInputButton>
             <ModelPicker currentModel={currentModel} onSelect={handleModelSelect} />
           </div>

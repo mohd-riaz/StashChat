@@ -1,4 +1,4 @@
-import { streamText, tool } from 'ai';
+import { streamText, tool, stepCountIs } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { z } from 'zod';
 import { unsealKey, sealKey, KEY_COOKIE_NAME, KEY_COOKIE_MAX_AGE } from '@/server/keyCookie';
@@ -149,10 +149,12 @@ export async function POST(request: Request): Promise<Response> {
         }
       : undefined;
 
+    const hasTools = Object.keys(tools).length > 0;
+
     const result = streamText({
       model: openrouter.chat(model),
       messages: toCoreMessages(messages),
-      tools,
+      ...(hasTools ? { tools, stopWhen: stepCountIs(5) } : {}),
       providerOptions,
       abortSignal: request.signal,
       onError: ({ error }) => {

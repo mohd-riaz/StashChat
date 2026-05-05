@@ -113,7 +113,7 @@ function SidebarContents({ conversations, activeId, onSelect, onNew, onRename, o
   return (
     <>
       <SidebarHeader className="gap-2 p-2">
-        <SidebarMenuButton tooltip="New chat" className="font-medium pointer-events-none">
+        <SidebarMenuButton tooltip="New chat" className="font-semibold pointer-events-none">
           {/* <Bot className="size-4 shrink-0" /> */}
           <Image src={resolvedTheme==='dark' ? stashChatDark : stashChatLight} alt='StashChat' className='size-4 shrink-0 translate-y-[0.05rem]'/>
           <span>

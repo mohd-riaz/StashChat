@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import * as messagesRepo from '@/lib/db/messages';
 import * as conversationsRepo from '@/lib/db/conversations';
@@ -16,6 +16,9 @@ export function ChatPane({
   onOpenSettings,
 }: { onOpenSettings: () => void }) {
   const activeId = useChatStore((s) => s.activeId);
+  const newConversation = useChatStore((s) => s.newConversation);
+  const [pendingParts, setPendingParts] = useState<Part[] | null>(null);
+  const sendingRef = useRef(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const opts: any = {
@@ -44,8 +47,39 @@ export function ChatPane({
       .then((rows) => setMessages(rows.map(toUiMessage) as never));
   }, [activeId, setMessages]);
 
+  // Send pending message once a conversation is active (created by onSubmit below).
+  useEffect(() => {
+    if (!pendingParts || !activeId || sendingRef.current) return;
+    sendingRef.current = true;
+    const parts = pendingParts;
+    setPendingParts(null);
+    void (async () => {
+      const userMsg = {
+        id: crypto.randomUUID(),
+        conversationId: activeId,
+        role: 'user' as const,
+        parts,
+        contentSummary: deriveContentSummary(parts),
+        timestamp: Date.now(),
+      };
+      await persistUserMessage(userMsg);
+      const { resolveModel, resolveToolConfig } = useChatStore.getState();
+      await sendMessage({ parts }, {
+        body: {
+          model: resolveModel(activeId),
+          toolConfig: resolveToolConfig(activeId),
+        },
+      });
+      sendingRef.current = false;
+    })();
+  }, [activeId, pendingParts, sendMessage]);
+
   const onSubmit = async (parts: Part[]) => {
-    if (!activeId) return;
+    if (!activeId) {
+      await newConversation();
+      setPendingParts(parts);
+      return;
+    }
     const userMsg = {
       id: crypto.randomUUID(),
       conversationId: activeId,
