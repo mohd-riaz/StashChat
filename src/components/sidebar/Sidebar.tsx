@@ -19,6 +19,10 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ConversationItem } from './ConversationItem';
 import type { Conversation } from '@/lib/db/schema';
+import stashChatLight from '../../../public/stash-chat-light.svg'
+import stashChatDark from '../../../public/stash-chat-dark.svg'
+import Image from 'next/image';
+import { useTheme } from 'next-themes';
 
 export interface SidebarProps {
   conversations: Conversation[];
@@ -97,6 +101,8 @@ function SidebarContents({ conversations, activeId, onSelect, onNew, onRename, o
   const [filter, setFilter] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
 
+  const {resolvedTheme} = useTheme()
+
   const filtered = useMemo(() => {
     const sorted = [...conversations].sort((a, b) => b.updatedAt - a.updatedAt);
     if (!filter.trim()) return sorted;
@@ -108,8 +114,13 @@ function SidebarContents({ conversations, activeId, onSelect, onNew, onRename, o
     <>
       <SidebarHeader className="gap-2 p-2">
         <SidebarMenuButton tooltip="New chat" className="font-medium pointer-events-none">
-          <Bot className="size-4 shrink-0" />
-          <span>StashChat</span>
+          {/* <Bot className="size-4 shrink-0" /> */}
+          <Image src={resolvedTheme==='dark' ? stashChatDark : stashChatLight} alt='StashChat' className='size-4 shrink-0 translate-y-[0.05rem]'/>
+          <span>
+            Stash<span className='text-primary'>
+              Chat
+            </span>
+          </span>
         </SidebarMenuButton>
 
         <SidebarMenuButton onClick={onNew} tooltip="New chat" className="font-normal">
