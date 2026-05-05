@@ -99,7 +99,11 @@ export async function POST(request: Request): Promise<Response> {
     if (!ct.includes('application/json'))
       return jsonNoStore({ error: 'unsupported_media_type' }, { status: 415 });
 
-    const apiKey = await unsealKey(readCookie(request, KEY_COOKIE_NAME));
+    const userKey = await unsealKey(readCookie(request, KEY_COOKIE_NAME));
+    const apiKey = userKey ?? process.env.OPENROUTER_API_KEY ?? null;
+
+    const isConfigured = userKey !== null
+
     if (!apiKey) return jsonNoStore({ error: 'no_key' }, { status: 401 });
 
     let raw: unknown;
@@ -128,7 +132,7 @@ export async function POST(request: Request): Promise<Response> {
       });
     }
 
-    const providerOptions = toolConfig.webSearch
+    const providerOptions = (isConfigured && toolConfig.webSearch)
       ? {
           openrouter: {
             tools: [{
@@ -151,8 +155,18 @@ export async function POST(request: Request): Promise<Response> {
 
     const hasTools = Object.keys(tools).length > 0;
 
+    let resolvedModel = 'openrouter/free'
+    
+    if(isConfigured){
+      resolvedModel = model
+    } else {
+      if(model.endsWith(":free")){
+        resolvedModel = model
+      }
+    }
+
     const result = streamText({
-      model: openrouter.chat(model),
+      model: openrouter.chat(resolvedModel),
       messages: toCoreMessages(messages),
       ...(hasTools ? { tools, stopWhen: stepCountIs(5) } : {}),
       providerOptions,

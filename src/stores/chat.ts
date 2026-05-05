@@ -3,7 +3,7 @@ import * as conversationsRepo from '@/lib/db/conversations';
 import * as messagesRepo from '@/lib/db/messages';
 import type { Conversation, Message, ToolConfig } from '@/lib/db/schema';
 
-export type KeyState = 'unknown' | 'configured' | 'unconfigured';
+export type KeyState = 'unknown' | 'configured' | 'owner' | 'unconfigured';
 
 export class SaveKeyError extends Error {
   constructor(public readonly code: string, message?: string) {
@@ -26,6 +26,8 @@ export interface ChatState {
   keyState: KeyState;
   defaultModel: string;
   toolConfig: ToolConfig;
+  settingsOpen: boolean;
+  setSettingsOpen: (open: boolean) => void;
 
   hydrate: () => Promise<void>;
   refreshKeyStatus: () => Promise<void>;
@@ -52,6 +54,7 @@ const initial = {
   keyState: 'unknown' as KeyState,
   defaultModel: DEFAULT_MODEL_FALLBACK,
   toolConfig: NO_TOOLS,
+  settingsOpen: false,
 };
 
 function readToolConfig(): ToolConfig {
@@ -70,6 +73,8 @@ function readToolConfig(): ToolConfig {
 export const useChatStore = create<ChatState>((set, get) => ({
   ...initial,
 
+  setSettingsOpen: (open) => set({ settingsOpen: open }),
+
   hydrate: async () => {
     const conversations = await conversationsRepo.list();
     let defaultModel = DEFAULT_MODEL_FALLBACK;
@@ -83,8 +88,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const res = await fetch('/api/key/status', { method: 'GET' });
       if (!res.ok) { set({ keyState: 'unconfigured' }); return; }
-      const body = (await res.json()) as { configured: boolean };
-      set({ keyState: body.configured ? 'configured' : 'unconfigured' });
+      const body = (await res.json()) as { configured: boolean; ownerKey: boolean };
+      let keyState: KeyState = 'unconfigured';
+      if (body.configured) keyState = 'configured';
+      else if (body.ownerKey) keyState = 'owner';
+      set({ keyState });
     } catch {
       set({ keyState: 'unconfigured' });
     }
@@ -114,7 +122,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       await fetch('/api/key', { method: 'DELETE' });
     } catch { /* swallow — wipe locally anyway */ }
-    set({ keyState: 'unconfigured' });
+    set({ keyState: 'owner' });
   },
 
   setActive: async (id) => {

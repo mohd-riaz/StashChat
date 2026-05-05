@@ -13,6 +13,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Toaster, toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 export default function Home() {
   const conversations = useChatStore((s) => s.conversations);
@@ -24,8 +25,12 @@ export default function Home() {
   const newConversation = useChatStore((s) => s.newConversation);
   const renameConversation = useChatStore((s) => s.renameConversation);
   const deleteConversation = useChatStore((s) => s.deleteConversation);
+  const settingsOpen = useChatStore((s) => s.settingsOpen);
+  const setSettingsOpen = useChatStore((s) => s.setSettingsOpen);
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const toasterTheme = (resolvedTheme === 'dark' ? 'dark' : 'light') as 'light' | 'dark';
+
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [renameTarget, setRenameTarget] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
@@ -39,6 +44,7 @@ export default function Home() {
     void hydrate().then(() => setHydrated(true));
     void refreshKeyStatus();
   }, [hydrate, refreshKeyStatus]);
+
 
   // URL → store: once after hydration, adopt ?c=<id> if it points to a real conversation.
   useEffect(() => {
@@ -73,7 +79,7 @@ export default function Home() {
     return (
       <>
         <SetupScreen />
-        <Toaster richColors position="top-center" />
+        <Toaster theme={toasterTheme} position="top-center" />
       </>
     );
   }
@@ -153,7 +159,7 @@ export default function Home() {
           </AlertDialogContent>
         </AlertDialog>
 
-      <Toaster richColors position="top-center" />
+      <Toaster theme={toasterTheme} richColors position="top-center" />
     </SidebarProvider>
   );
 }

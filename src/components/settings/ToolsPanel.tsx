@@ -1,5 +1,6 @@
 'use client';
 
+import { LockIcon } from 'lucide-react';
 import { useChatStore } from '@/stores/chat';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -12,9 +13,11 @@ import {
 } from '@/components/ui/select';
 import type { ToolConfig } from '@/lib/db/schema';
 
-export function ToolsPanel() {
+export function ToolsPanel({ onGoToKey }: { onGoToKey?: () => void }) {
   const cfg = useChatStore((s) => s.toolConfig);
   const setToolConfig = useChatStore((s) => s.setToolConfig);
+  const keyState = useChatStore((s) => s.keyState);
+  const restricted = keyState !== 'configured';
 
   const update = (patch: Partial<ToolConfig> & { params?: Partial<NonNullable<ToolConfig['webSearchParams']>> }) => {
     const next: ToolConfig = {
@@ -31,11 +34,23 @@ export function ToolsPanel() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <span className="text-sm">Web search</span>
-        <Switch
-          checked={cfg.webSearch}
-          onCheckedChange={(checked) => update({ webSearch: checked })}
-          aria-label="Web search"
-        />
+        {restricted ? (
+          <button
+            type="button"
+            onClick={onGoToKey}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            aria-label="Web search locked — add API key"
+          >
+            <LockIcon className="size-3.5" />
+            <span>Requires your key</span>
+          </button>
+        ) : (
+          <Switch
+            checked={cfg.webSearch}
+            onCheckedChange={(checked) => update({ webSearch: checked })}
+            aria-label="Web search"
+          />
+        )}
       </div>
 
       {cfg.webSearch && (

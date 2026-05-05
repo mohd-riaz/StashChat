@@ -30,9 +30,11 @@ function formatContext(n: number): string {
   return String(n);
 }
 
-export function ModelPanel() {
+export function ModelPanel({ onGoToKey }: { onGoToKey?: () => void }) {
   const defaultModel = useChatStore((s) => s.defaultModel);
   const setDefaultModel = useChatStore((s) => s.setDefaultModel);
+  const keyState = useChatStore((s) => s.keyState);
+  const restricted = keyState !== 'configured';
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,8 +45,11 @@ export function ModelPanel() {
   const PINNED_ID = 'openrouter/free';
 
   const { pinned, groups } = useMemo(() => {
-    const pinnedModel = models.find((m) => m.id === PINNED_ID);
-    const rest = models.filter((m) => m.id !== PINNED_ID);
+    const visible = restricted
+      ? models.filter((m) => m.id === PINNED_ID || m.id.endsWith(':free'))
+      : models;
+    const pinnedModel = visible.find((m) => m.id === PINNED_ID);
+    const rest = visible.filter((m) => m.id !== PINNED_ID);
     const map = new Map<string, ModelInfo[]>();
     for (const m of rest) {
       const p = providerSlug(m.id);
@@ -55,7 +60,7 @@ export function ModelPanel() {
       pinned: pinnedModel,
       groups: Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b)),
     };
-  }, [models]);
+  }, [models, restricted]);
 
   const current = models.find((m) => m.id === defaultModel);
   const currentDisplay = current ? shortName(current) : (defaultModel.split('/').pop() ?? defaultModel);
@@ -86,8 +91,20 @@ export function ModelPanel() {
       ) : (
         <Command className="rounded-lg border">
           <CommandInput placeholder="Search models…" className="h-8 text-sm" />
-          <CommandList className="max-h-[280px]">
+          <CommandList className="max-h-70">
             <CommandEmpty>No models found</CommandEmpty>
+            {restricted && (
+              <div className="px-3 py-2 text-xs text-muted-foreground border-b">
+                <button
+                  type="button"
+                  className="underline underline-offset-2 text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                  onClick={onGoToKey}
+                >
+                  Add your API key
+                </button>
+                {' '}to access paid models.
+              </div>
+            )}
             {pinned && (
               <CommandGroup heading="Free">
                 <CommandItem

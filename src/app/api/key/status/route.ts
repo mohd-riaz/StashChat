@@ -16,6 +16,7 @@ function readCookie(request: Request, name: string): string | undefined {
 export async function GET(request: Request): Promise<Response> {
   const value = readCookie(request, KEY_COOKIE_NAME);
   const apiKey = await unsealKey(value);
+  const hasOwnerKey = !!process.env.OPENROUTER_API_KEY;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -23,10 +24,10 @@ export async function GET(request: Request): Promise<Response> {
   };
 
   if (apiKey === null) {
-    return new Response(JSON.stringify({ configured: false }), { status: 200, headers });
+    return new Response(JSON.stringify({ configured: false, ownerKey: hasOwnerKey }), { status: 200, headers });
   }
 
   const refreshed = await sealKey(apiKey);
   headers['Set-Cookie'] = `${KEY_COOKIE_NAME}=${refreshed}; ${SET_COOKIE_FLAGS}; Max-Age=${KEY_COOKIE_MAX_AGE}`;
-  return new Response(JSON.stringify({ configured: true }), { status: 200, headers });
+  return new Response(JSON.stringify({ configured: true, ownerKey: hasOwnerKey }), { status: 200, headers });
 }

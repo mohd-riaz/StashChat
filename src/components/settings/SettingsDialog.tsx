@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { toast } from 'sonner';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -17,8 +19,15 @@ export function SettingsDialog({
 }: { open: boolean; onClose: () => void }) {
   const saveKey = useChatStore((s) => s.saveKey);
   const forgetKey = useChatStore((s) => s.forgetKey);
+  const [tab, setTab] = useState('key');
 
-  const onForget = async () => { await forgetKey(); onClose(); };
+  const onSaveKey = async (apiKey: string) => {
+    await saveKey(apiKey);
+    toast.success('API key saved');
+    onClose();
+  };
+
+  const onForget = async () => { await forgetKey(); toast.success('API key removed'); onClose(); };
 
   const {theme, setTheme} = useTheme()
 
@@ -28,7 +37,7 @@ export function SettingsDialog({
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="key">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="key">Key</TabsTrigger>
             <TabsTrigger value="model">Model</TabsTrigger>
@@ -36,9 +45,9 @@ export function SettingsDialog({
             <TabsTrigger value="theme">Theme</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
-          <TabsContent value="key" className="pt-4"><KeyPanel onSave={saveKey} onForget={onForget} /></TabsContent>
-          <TabsContent value="model" className="pt-4"><ModelPanel /></TabsContent>
-          <TabsContent value="tools" className="pt-4"><ToolsPanel /></TabsContent>
+          <TabsContent value="key" className="pt-4"><KeyPanel onSave={onSaveKey} onForget={onForget} /></TabsContent>
+          <TabsContent value="model" className="pt-4"><ModelPanel onGoToKey={() => setTab('key')} /></TabsContent>
+          <TabsContent value="tools" className="pt-4"><ToolsPanel onGoToKey={() => setTab('key')} /></TabsContent>
           <TabsContent value="theme" className="pt-4 space-y-3">
             <p className="text-sm text-muted-foreground">Choose how StashChat appears.</p>
             <ButtonGroup>

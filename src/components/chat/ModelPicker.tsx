@@ -17,10 +17,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { getModels } from '@/lib/models/cache';
 import type { ModelInfo } from '@/lib/models/types';
+import { useChatStore } from '@/stores/chat';
 
 interface Props {
   currentModel: string;
   onSelect: (modelId: string) => void;
+  restricted?: boolean;
 }
 
 function providerSlug(modelId: string): string {
@@ -38,9 +40,10 @@ function formatContext(n: number): string {
   return String(n);
 }
 
-export function ModelPicker({ currentModel, onSelect }: Props) {
+export function ModelPicker({ currentModel, onSelect, restricted = false }: Props) {
   const [open, setOpen] = useState(false);
   const [models, setModels] = useState<ModelInfo[]>([]);
+  const setSettingsOpen = useChatStore((s) => s.setSettingsOpen);
 
   useEffect(() => {
     getModels().then(({ models: m }) => setModels(m));
@@ -49,8 +52,11 @@ export function ModelPicker({ currentModel, onSelect }: Props) {
   const PINNED_ID = 'openrouter/free';
 
   const { pinned, groups } = useMemo(() => {
-    const pinnedModel = models.find((m) => m.id === PINNED_ID);
-    const rest = models.filter((m) => m.id !== PINNED_ID);
+    const visible = restricted
+      ? models.filter((m) => m.id === PINNED_ID || m.id.endsWith(':free'))
+      : models;
+    const pinnedModel = visible.find((m) => m.id === PINNED_ID);
+    const rest = visible.filter((m) => m.id !== PINNED_ID);
     const map = new Map<string, ModelInfo[]>();
     for (const m of rest) {
       const p = providerSlug(m.id);
@@ -61,7 +67,7 @@ export function ModelPicker({ currentModel, onSelect }: Props) {
       pinned: pinnedModel,
       groups: Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b)),
     };
-  }, [models]);
+  }, [models, restricted]);
 
   const displayName = useMemo(() => {
     const found = models.find((m) => m.id === currentModel);
@@ -98,8 +104,20 @@ export function ModelPicker({ currentModel, onSelect }: Props) {
         showCloseButton={false}
       >
         <ModelSelectorInput placeholder="Search models…" />
-        <ModelSelectorList className="max-h-[320px]">
+        <ModelSelectorList className="max-h-80">
           <ModelSelectorEmpty>No models found</ModelSelectorEmpty>
+          {restricted && (
+            <div className="px-3 py-2 text-xs text-muted-foreground border-b">
+              <button
+                type="button"
+                className="underline underline-offset-2 text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                onClick={() => { setOpen(false); setSettingsOpen(true); }}
+              >
+                Add your API key
+              </button>
+              {' '}to access paid models.
+            </div>
+          )}
           {pinned && (
             <ModelSelectorGroup heading="Free">
               <ModelSelectorItem

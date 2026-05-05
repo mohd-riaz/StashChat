@@ -9,6 +9,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { keyErrorMessage } from '@/components/setup/keyErrorMessage';
+import { useChatStore } from '@/stores/chat';
 
 export interface KeyPanelProps {
   onSave: (apiKey: string) => Promise<void>;
@@ -21,6 +22,8 @@ export function KeyPanel({ onSave, onForget }: KeyPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const {keyState} = useChatStore()
+
   const submit = async () => {
     setError(null);
     const trimmed = key.trim();
@@ -29,7 +32,6 @@ export function KeyPanel({ onSave, onForget }: KeyPanelProps) {
     try {
       await onSave(trimmed);
       setKey('');
-      setShowForm(false);
     } catch (e) {
       setError(keyErrorMessage(e));
     } finally {
@@ -45,8 +47,9 @@ export function KeyPanel({ onSave, onForget }: KeyPanelProps) {
 
       {!showForm ? (
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowForm(true)}>Replace key</Button>
-          <AlertDialog>
+          <Button variant="outline" onClick={() => setShowForm(true)}>{keyState==='configured' ? 'Replace key' : 'Add key'}</Button>
+
+          { keyState==='configured' && <AlertDialog>
             <AlertDialogTrigger
               render={<Button variant="destructive">Forget my key</Button>}
             />
@@ -62,11 +65,11 @@ export function KeyPanel({ onSave, onForget }: KeyPanelProps) {
                 <AlertDialogAction onClick={() => void onForget()}>Forget</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
-          </AlertDialog>
+          </AlertDialog>}
         </div>
       ) : (
         <div className="space-y-2">
-          <label className="text-sm space-y-1 block">
+          <label className="flex flex-col gap-1">
             <span>API key</span>
             <Input
               type="password"

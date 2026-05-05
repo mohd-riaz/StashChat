@@ -248,6 +248,30 @@
 
 
 
+[data-sonner-toaster][data-sonner-theme=light] {
+  --normal-bg: var(--popover);
+  --normal-border: var(--border);
+  --normal-text: var(--popover-foreground);
+  --success-bg: var(--popover);
+  --success-border: var(--border);
+  --success-text: var(--popover-foreground);
+  --error-bg: var(--popover);
+  --error-border: var(--border);
+  --error-text: var(--popover-foreground);
+}
+
+[data-sonner-toaster][data-sonner-theme=dark] {
+  --normal-bg: var(--popover);
+  --normal-border: var(--border);
+  --normal-text: var(--popover-foreground);
+  --success-bg: var(--popover);
+  --success-border: var(--border);
+  --success-text: var(--popover-foreground);
+  --error-bg: var(--popover);
+  --error-border: var(--border);
+  --error-text: var(--popover-foreground);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

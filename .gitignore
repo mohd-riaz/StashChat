@@ -49,3 +49,5 @@ AGENTS.md
 .mcp.json
 
 docs/
+
+.playwright-mcp/
