@@ -246,6 +246,19 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
 }
 
+/* Fix streamdown code block header: language label + buttons on same row */
+[data-streamdown="code-block"] {
+  position: relative;
+}
+
+[data-streamdown="code-block"] > div:has(> [data-streamdown="code-block-actions"]) {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  height: 2rem !important;
+  margin-top: 0 !important;
+  pointer-events: auto !important;
+}
 
 
 [data-sonner-toaster][data-sonner-theme=light] {

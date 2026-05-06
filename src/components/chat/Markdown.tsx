@@ -3,9 +3,17 @@
 import dynamic from 'next/dynamic';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
 import { sanitizeUrl } from '@/lib/markdown/sanitize';
-import { CodeBlock } from './CodeBlock';
+import type { BundledLanguage } from 'shiki';
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockHeader,
+  CodeBlockTitle,
+  CodeBlockFilename,
+} from '@/components/ai-elements/code-block';
 
 const MermaidDiagram = dynamic(() => import('./MermaidDiagram'), {
   ssr: false,
@@ -26,8 +34,29 @@ const components: Components = {
   a: SanitizedAnchor,
   code({ className, children, ...rest }) {
     const lang = /language-(\w+)/.exec(className ?? '')?.[1];
-    if (lang === 'mermaid') return <MermaidDiagram source={String(children).trim()} />;
-    return <CodeBlock className={className} {...rest}>{children}</CodeBlock>;
+
+    if (!lang) {
+      return <code className="rounded px-1 py-0.5 bg-muted font-mono text-[0.85em]" {...rest}>{children}</code>;
+    }
+
+    if (lang === 'mermaid') {
+      return <MermaidDiagram source={String(children).trim()} />;
+    }
+
+    const code = String(children).replace(/\n$/, '');
+
+    return (
+      <CodeBlock code={code} language={lang as BundledLanguage} className="my-1">
+        <CodeBlockHeader>
+          <CodeBlockTitle>
+            <CodeBlockFilename>{lang}</CodeBlockFilename>
+          </CodeBlockTitle>
+          <CodeBlockActions>
+            <CodeBlockCopyButton className="h-6 w-6" />
+          </CodeBlockActions>
+        </CodeBlockHeader>
+      </CodeBlock>
+    );
   },
 };
 
@@ -36,7 +65,6 @@ export function Markdown({ source }: { source: string }) {
     <div className="prose prose-sm dark:prose-invert max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
         skipHtml
         components={components}
       >
