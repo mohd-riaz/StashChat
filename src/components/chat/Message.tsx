@@ -13,6 +13,7 @@ import {
 } from '@/components/ai-elements/message';
 import { ImageLightbox } from './ImageLightbox';
 import { ToolCallStep, pairToolParts } from './ToolCallSteps';
+import { SkeletonLines, SkeletonModelLabel } from './MessageSkeleton';
 import type { Message as MessageType, Part } from '@/lib/db/schema';
 import Image from 'next/image';
 
@@ -46,10 +47,7 @@ export function Message({
   return (
     <MessageEl from={message.role as 'user' | 'assistant'}>
       {!isUser && !(message.resolvedModel ?? message.requestedModel) && isStreaming && (
-        <div className="mb-1.5 flex items-center gap-1">
-          <div className="h-3 w-3 rounded-sm bg-muted-foreground animate-pulse" />
-          <div className="h-3 w-24 rounded bg-muted-foreground animate-pulse" />
-        </div>
+        <SkeletonModelLabel />
       )}
       {!isUser && (message.resolvedModel ?? message.requestedModel) && (
         <div className="mb-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -74,6 +72,7 @@ export function Message({
         </div>
       )}
       <MessageContent>
+        {isStreaming && !textContent && <SkeletonLines />}
         {pairToolParts(message.parts).map((item, i) => {
           if ('call' in (item as object) && (item as { call?: unknown }).call) {
             return <ToolCallStep key={i} pair={item as never} />;

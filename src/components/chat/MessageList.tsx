@@ -8,6 +8,7 @@ import {
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
 import { Message } from './Message';
+import { MessageSkeleton } from './MessageSkeleton';
 import type { Message as MessageType } from '@/lib/db/schema';
 
 interface Props {
@@ -19,24 +20,29 @@ export function MessageList({ messages, streaming }: Props) {
   return (
     <Conversation className="flex-1">
       <ConversationContent className="max-w-3xl mx-auto w-full">
-        {messages.length === 0 ? (
+        {messages.length === 0 && !streaming ? (
           <ConversationEmptyState
             title="How can I help you?"
             description="Start a conversation, attach images, or enable web search from the toolbar."
             icon={<MessageSquare className="size-8" />}
           />
         ) : (
-          messages.map((msg, idx) => (
-            <Message
-              key={msg.id}
-              message={msg}
-              isStreaming={
-                streaming &&
-                idx === messages.length - 1 &&
-                msg.role === 'assistant'
-              }
-            />
-          ))
+          <>
+            {messages.map((msg, idx) => (
+              <Message
+                key={msg.id}
+                message={msg}
+                isStreaming={
+                  streaming &&
+                  idx === messages.length - 1 &&
+                  msg.role === 'assistant'
+                }
+              />
+            ))}
+            {streaming && messages[messages.length - 1]?.role !== 'assistant' && (
+              <MessageSkeleton />
+            )}
+          </>
         )}
       </ConversationContent>
       <ConversationScrollButton />

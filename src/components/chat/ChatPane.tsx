@@ -12,6 +12,18 @@ import { fromUiMessage, toUiMessage, type UIMessage } from './toUiMessage';
 import type { Part } from '@/lib/db/schema';
 import { deriveContentSummary } from '@/lib/db/contentSummary';
 
+function deriveTitle(parts: Part[]): string {
+  const text = parts
+    .filter((p): p is Extract<Part, { type: 'text' }> => p.type === 'text')
+    .map((p) => p.text)
+    .join(' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+  const firstLine = text.split('\n')[0]?.trim() ?? '';
+  const title = firstLine || text;
+  return title.length > 60 ? `${title.slice(0, 57)}…` : title;
+}
+
 export function ChatPane({
   onOpenSettings,
 }: { onOpenSettings: () => void }) {
@@ -77,8 +89,15 @@ export function ChatPane({
   const onSubmit = async (parts: Part[]) => {
     if (!activeId) {
       await newConversation();
+      const id = useChatStore.getState().activeId!;
+      const title = deriveTitle(parts);
+      if (title) void useChatStore.getState().renameConversation(id, title);
       setPendingParts(parts);
       return;
+    }
+    if (messages.length === 0) {
+      const title = deriveTitle(parts);
+      if (title) void useChatStore.getState().renameConversation(activeId, title);
     }
     const userMsg = {
       id: crypto.randomUUID(),
