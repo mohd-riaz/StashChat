@@ -155,18 +155,18 @@ export async function POST(request: Request): Promise<Response> {
 
     const hasTools = Object.keys(tools).length > 0;
 
-    let resolvedModel = 'openrouter/free'
+    let guardedModel = 'openrouter/free'
     
     if(isConfigured){
-      resolvedModel = model
+      guardedModel = model
     } else {
       if(model.endsWith(":free")){
-        resolvedModel = model
+        guardedModel = model
       }
     }
 
     const result = streamText({
-      model: openrouter.chat(resolvedModel),
+      model: openrouter.chat(guardedModel),
       messages: toCoreMessages(messages),
       ...(hasTools ? { tools, stopWhen: stepCountIs(5) } : {}),
       providerOptions,
@@ -181,6 +181,11 @@ export async function POST(request: Request): Promise<Response> {
 
     return result.toUIMessageStreamResponse({
       headers: { 'Set-Cookie': setCookie, 'Cache-Control': 'no-store' },
+      messageMetadata: ({ part }) => {
+        if (part.type === 'finish-step') {
+          return { requestedModel: model, resolvedModel: part.response.modelId ?? guardedModel };
+        }
+      },
     });
   } catch (err) {
     logError('Unhandled error', err);
