@@ -102,9 +102,9 @@ export async function POST(request: Request): Promise<Response> {
     const userKey = await unsealKey(readCookie(request, KEY_COOKIE_NAME));
     const apiKey = userKey ?? process.env.OPENROUTER_API_KEY ?? null;
 
-    const isConfigured = userKey !== null
-
     if (!apiKey) return jsonNoStore({ error: 'no_key' }, { status: 401 });
+    
+    const isConfigured = userKey !== null;
 
     let raw: unknown;
     try { raw = await request.json(); } catch (err) {
@@ -165,28 +165,47 @@ export async function POST(request: Request): Promise<Response> {
       }
     }
 
-    const result = streamText({
-      model: openrouter.chat(guardedModel),
-      messages: toCoreMessages(messages),
-      ...(hasTools ? { tools, stopWhen: stepCountIs(5) } : {}),
-      providerOptions,
-      abortSignal: request.signal,
-      onError: ({ error }) => {
-        logError('streamText error', error, { model, messageCount: messages.length });
-      },
-    });
+    const MAX_ATTEMPTS = 5;
+    let lastError: unknown;
 
-    const sealed = await sealKey(apiKey);
-    const setCookie = `${KEY_COOKIE_NAME}=${sealed}; ${SET_COOKIE_FLAGS}; Max-Age=${KEY_COOKIE_MAX_AGE}`;
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      try {
+        const result = streamText({
+          model: openrouter.chat(guardedModel),
+          messages: toCoreMessages(messages),
+          ...(hasTools ? { tools, stopWhen: stepCountIs(5) } : {}),
+          providerOptions,
+          abortSignal: request.signal,
+          maxRetries: 0, // we handle retries ourselves
+          onError: ({ error }) => {
+            logError('streamText error', error, { model, attempt, messageCount: messages.length });
+          },
+        });
 
-    return result.toUIMessageStreamResponse({
-      headers: { 'Set-Cookie': setCookie, 'Cache-Control': 'no-store' },
-      messageMetadata: ({ part }) => {
-        if (part.type === 'finish-step') {
-          return { requestedModel: model, resolvedModel: part.response.modelId ?? guardedModel };
+        const headers: Record<string, string> = { 'Cache-Control': 'no-store' };
+        if (userKey) {
+          const freshSeal = await sealKey(userKey);
+          headers['Set-Cookie'] = `${KEY_COOKIE_NAME}=${freshSeal}; ${SET_COOKIE_FLAGS}; Max-Age=${KEY_COOKIE_MAX_AGE}`;
         }
-      },
-    });
+
+        return result.toUIMessageStreamResponse({
+          headers,
+          messageMetadata: ({ part }) => {
+            if (part.type === 'finish-step') {
+              return { requestedModel: model, resolvedModel: part.response.modelId ?? guardedModel };
+            }
+          },
+        });
+      } catch (err) {
+        lastError = err;
+        logError('Attempt failed', err, { attempt, model: guardedModel });
+        if (attempt < MAX_ATTEMPTS - 1) {
+          await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+        }
+      }
+    }
+
+    throw lastError;
   } catch (err) {
     logError('Unhandled error', err);
     return jsonNoStore({ error: 'internal_error' }, { status: 500 });
