@@ -60,6 +60,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-tint: var(--primary-tint);
+  --color-primary-ring: var(--primary-ring);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -191,6 +194,9 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+  --primary-deep: oklch(0.5083 0.0870 140);
+  --primary-tint: color-mix(in oklch, var(--primary) 14%, white);
+  --primary-ring: color-mix(in oklch, var(--primary) 35%, white);
 }
 
 .dark {
@@ -244,6 +250,9 @@
   --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  --primary-deep: oklch(0.78 0.09 140);
+  --primary-tint: color-mix(in oklch, var(--primary) 18%, oklch(0.27 0.005 100));
+  --primary-ring: color-mix(in oklch, var(--primary) 50%, oklch(0.27 0.005 100));
 }
 
 /* Fix streamdown code block header: language label + buttons on same row */
@@ -284,6 +293,9 @@
   --error-border: var(--border);
   --error-text: var(--popover-foreground);
 }
+
+@keyframes sc-blink { from { opacity: 1 } to { opacity: 0 } }
+
 
 @layer base {
   * {
