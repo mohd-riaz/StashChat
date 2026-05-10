@@ -172,6 +172,7 @@ export async function POST(request: Request): Promise<Response> {
       try {
         const result = streamText({
           model: openrouter.chat(guardedModel),
+          system: 'You are a helpful AI assistant running inside StashChat, a privacy-first chat app where all conversations are stored locally in the user\'s browser. Be concise and helpful.',
           messages: toCoreMessages(messages),
           ...(hasTools ? { tools, stopWhen: stepCountIs(5) } : {}),
           providerOptions,
