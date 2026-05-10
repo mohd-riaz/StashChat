@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useChatStore } from '@/stores/chat';
 import { AppSidebar } from '@/components/sidebar/Sidebar';
@@ -15,7 +15,7 @@ import {
 import { Toaster, toast } from 'sonner';
 import { useTheme } from 'next-themes';
 
-export default function Home() {
+function ChatPage() {
   const conversations = useChatStore((s) => s.conversations);
   const activeId = useChatStore((s) => s.activeId);
   const keyState = useChatStore((s) => s.keyState);
@@ -161,5 +161,13 @@ export default function Home() {
 
       <Toaster theme={toasterTheme} richColors position="top-center" />
     </SidebarProvider>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense>
+      <ChatPage />
+    </Suspense>
   );
 }
