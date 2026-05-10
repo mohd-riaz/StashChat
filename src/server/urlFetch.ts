@@ -1,4 +1,4 @@
-import { JSDOM } from 'jsdom';
+import { parseHTML } from 'linkedom';
 import { Readability } from '@mozilla/readability';
 import TurndownService from 'turndown';
 import { lookup } from 'node:dns/promises';
@@ -111,8 +111,8 @@ export async function fetchUrlReadable(
   if (!res.body) return { url: finalUrl, error: 'No response body' };
 
   const html = await readCapped(res.body, MAX_BYTES);
-  const dom = new JSDOM(html, { url: finalUrl });
-  const article = new Readability(dom.window.document).parse();
+  const { document } = parseHTML(html);
+  const article = new Readability(document).parse();
   if (!article) return { url: finalUrl, error: 'Could not extract main content' };
 
   const md = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
