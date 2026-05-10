@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { sanitizeUrl } from '@/lib/markdown/sanitize';
@@ -14,11 +13,6 @@ import {
   CodeBlockTitle,
   CodeBlockFilename,
 } from '@/components/ai-elements/code-block';
-
-const MermaidDiagram = dynamic(() => import('./MermaidDiagram'), {
-  ssr: false,
-  loading: () => <div className="text-xs text-muted-foreground">Loading diagram…</div>,
-});
 
 const SanitizedAnchor: NonNullable<Components['a']> = ({ href, children, ...rest }) => {
   const safe = sanitizeUrl(href);
@@ -37,10 +31,6 @@ const components: Components = {
 
     if (!lang) {
       return <code className="rounded px-1 py-0.5 bg-muted font-mono text-[0.85em]" {...rest}>{children}</code>;
-    }
-
-    if (lang === 'mermaid') {
-      return <MermaidDiagram source={String(children).trim()} />;
     }
 
     const code = String(children).replace(/\n$/, '');
