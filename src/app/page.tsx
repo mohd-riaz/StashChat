@@ -33,7 +33,7 @@ function Wordmark({ size = 18 }: { size?: number }) {
 
 function Brand({ textSize = 17 }: { textSize?: number }) {
   return (
-    <span className="inline-flex items-center gap-[9px] leading-none">
+    <span className="inline-flex items-center gap-2.25 leading-none">
       <Logo size={Math.round(textSize * 1.15)} />
       <Wordmark size={textSize} />
     </span>
@@ -60,7 +60,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function Nav({ onToggleTheme }: { onToggleTheme: () => void }) {
   return (
     <nav className="sticky top-0 z-30 border-b border-border backdrop-blur-sm [background:color-mix(in_oklch,var(--background)_65%,transparent)]">
-      <div className="flex items-center justify-between mx-auto max-w-[1200px] px-4 sm:px-7 py-[14px]">
+      <div className="flex items-center justify-between mx-auto max-w-300 px-4 sm:px-7 py-3.5">
         <a href="#" className="inline-flex no-underline"><Brand textSize={17} /></a>
         <div className="hidden md:flex items-center gap-1 text-sm">
           {([['Why', '#why'], ['Models', '#models'], ['How it works', '#how'], ['FAQ', '#faq']] as const).map(([t, h]) => (
@@ -85,24 +85,24 @@ function Nav({ onToggleTheme }: { onToggleTheme: () => void }) {
 function Hero() {
   return (
     <section className="relative">
-      <div className="grid items-center mx-auto max-w-[1240px] px-4 sm:px-7 pt-12 sm:pt-[72px] pb-10 sm:pb-14 gap-8 lg:gap-14 grid-cols-1 lg:grid-cols-[1fr_1.05fr]">
+      <div className="grid items-center mx-auto max-w-310 px-4 sm:px-7 pt-12 sm:pt-18 pb-10 sm:pb-14 gap-8 lg:gap-14 grid-cols-1 lg:grid-cols-[1fr_1.05fr]">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-card border border-border text-muted-foreground px-[11px] py-[5px] text-[12px]">
+          <div className="inline-flex items-center gap-2 rounded-full bg-card border border-border text-muted-foreground px-2.75 py-1.25 text-[12px]">
             <span className="w-1.5 h-1.5 rounded-full bg-primary" />
             No sign-up. No accounts. Free to use.
           </div>
-          <h1 className="font-semibold text-foreground text-[clamp(40px,5.4vw,64px)] leading-[1.04] tracking-[-0.025em] mt-5 mb-[18px]">
+          <h1 className="font-semibold text-foreground text-[clamp(40px,5.4vw,64px)] leading-[1.04] tracking-tight mt-5 mb-4.5">
             A chat app that{' '}
-            <em className="not-italic text-primary-deep relative whitespace-nowrap">
+            <em className="not-italic text-primary-deep relative sm:whitespace-nowrap">
               keeps things to itself
-              <svg className="absolute left-0 right-0 w-full -bottom-1.5 h-[10px]"
+              <svg className="absolute left-0 right-0 w-full -bottom-1.5 h-2.5 hidden sm:block"
                 viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden>
                 <path d="M2 6 C 40 2, 80 9, 120 5 S 196 4, 198 6"
                   stroke="var(--primary)" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7"/>
               </svg>
             </em>.
           </h1>
-          <p className="text-muted-foreground text-[18px] leading-[1.55] max-w-[520px] m-0">
+          <p className="text-muted-foreground text-[18px] leading-[1.55] max-w-130 m-0">
             StashChat saves your conversations on your own device, never on our servers.
             Pick from hundreds of AI models. See exactly which one wrote each reply. Your chats are yours.
           </p>
@@ -135,7 +135,7 @@ function AppFrame({ children }: { children: React.ReactNode }) {
           stashchat.mohdriaz.com
         </div>
       </div>
-      <div className="h-[320px] sm:h-[460px] flex min-h-0">{children}</div>
+      <div className="h-80 sm:h-115 flex min-h-0">{children}</div>
     </div>
   );
 }
@@ -143,20 +143,20 @@ function AppFrame({ children }: { children: React.ReactNode }) {
 function MockSidebar() {
   const convs = ['Tahini sauce ratios', 'Trip to Lisbon, 5 days', 'Help me name my cat', 'Refactor my login screen', 'Bedtime story for Maya', 'SQL for monthly cohorts'];
   return (
-    <aside className="bg-sidebar border-r border-border hidden sm:flex flex-col gap-1 text-sm w-[200px] p-2">
-      <div className="flex items-center text-foreground px-2 py-[6px]">
+    <aside className="bg-sidebar border-r border-border hidden sm:flex flex-col gap-1 text-sm w-50 p-2">
+      <div className="flex items-center text-foreground px-2 py-1.5">
         <Brand textSize={14} />
       </div>
-      <Button variant="ghost" className="justify-start gap-2 w-full font-normal text-[13px] h-auto px-[9px] py-[7px]">
+      <Button variant="ghost" className="justify-start gap-2 w-full font-normal text-[13px] h-auto px-2.25 py-1.75">
         <SquarePen className="size-3.5" />New chat
       </Button>
       <div className="relative">
-        <Search className="absolute text-muted-foreground left-[10px] top-1/2 -translate-y-1/2 size-3" />
-        <input readOnly placeholder="Search…" className="w-full bg-card text-foreground border border-border rounded-md outline-none py-[6px] pl-7 pr-2 text-[12px]" />
+        <Search className="absolute text-muted-foreground left-2.5 top-1/2 -translate-y-1/2 size-3" />
+        <input readOnly placeholder="Search…" className="w-full bg-card text-foreground border border-border rounded-md outline-none py-1.5 pl-7 pr-2 text-[12px]" />
       </div>
       <div className="h-1" />
       {convs.map((t, i) => (
-        <Button key={t} variant="ghost" className={`justify-start w-full h-auto px-[9px] py-[6px] text-[12.5px] font-normal truncate ${i === 0 ? 'bg-muted text-foreground font-medium hover:bg-muted' : 'text-muted-foreground'}`}>{t}</Button>
+        <Button key={t} variant="ghost" className={`justify-start w-full h-auto px-2.25 py-1.5 text-[12.5px] font-normal truncate ${i === 0 ? 'bg-muted text-foreground font-medium hover:bg-muted' : 'text-muted-foreground'}`}>{t}</Button>
       ))}
     </aside>
   );
@@ -188,7 +188,7 @@ function ModelLine({ provider = 'anthropic', name = 'claude-haiku-4.5' }: { prov
 function UserMsg({ children }: { children: React.ReactNode }) {
   return (
     <div className="self-end max-w-[78%]">
-      <div className="bg-muted text-foreground rounded-2xl px-[13px] py-[9px] text-[13.5px] leading-[1.5]">{children}</div>
+      <div className="bg-muted text-foreground rounded-2xl px-3.25 py-2.25 text-[13.5px] leading-normal">{children}</div>
     </div>
   );
 }
@@ -199,7 +199,7 @@ function AsstMsg({ provider, model, children, streaming }: { provider: string; m
       <ModelLine provider={provider} name={model} />
       <div className="text-foreground text-[13.5px] leading-[1.55]">
         {children}
-        {streaming && <span className="inline-block bg-primary align-middle w-[7px] h-[13px] ml-0.5 -mb-px [animation:sc-blink_1s_steps(2)_infinite]" />}
+        {streaming && <span className="inline-block bg-primary align-middle w-1.75 h-3.25 ml-0.5 -mb-px animate-[sc-blink_1s_steps(2)_infinite]" />}
       </div>
     </div>
   );
@@ -217,7 +217,7 @@ function CompBtn({ children, active, wide }: { children: React.ReactNode; active
 
 function MockComposer() {
   return (
-    <div className="pt-2 px-4 pb-4 max-w-[720px] mx-auto w-full shrink-0">
+    <div className="pt-2 px-4 pb-4 max-w-180 mx-auto w-full shrink-0">
       <div className="bg-card border border-input rounded-xl px-3 py-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div className="text-muted-foreground min-h-9 py-1 px-0.5 text-sm">Message StashChat…</div>
         <div className="flex items-center justify-between mt-1.5 gap-2">
@@ -248,7 +248,7 @@ function AppMock() {
           <UserMsg>How do I make tahini sauce that doesn&apos;t seize up?</UserMsg>
           <AsstMsg provider="openrouter" model="free" streaming>
             <p className="m-0">Whisk these together in this order:</p>
-            <ul className="mt-2 ml-[18px] p-0">
+            <ul className="mt-2 ml-4.5 p-0">
               <li>3 tbsp tahini</li>
               <li>2 tbsp lemon juice</li>
               <li>3–4 tbsp warm water, added a little at a time</li>
@@ -266,14 +266,14 @@ function FlowDiagram() {
   return (
     <div className="bg-card border border-border rounded-2xl p-7 shadow-[0_14px_28px_-22px_rgba(0,0,0,0.18)]">
       <div className="overflow-x-auto -mx-2 px-2">
-      <div className="grid items-center grid-cols-[1fr_80px_1fr] min-w-[420px]">
+      <div className="grid items-center grid-cols-[1fr_80px_1fr] min-w-105">
         <div className="bg-sidebar border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 text-foreground font-medium mb-3 text-[12px]">
             <Cpu size={14} /> Your computer
           </div>
           <div className="flex flex-col gap-1.5">
             {['Tahini sauce ratios', 'Trip to Lisbon', 'Help me name my cat', 'Refactor login'].map(t => (
-              <div key={t} className="flex items-center gap-2 bg-card border border-border rounded-md text-foreground px-2.5 py-[7px] text-[12px]">
+              <div key={t} className="flex items-center gap-2 bg-card border border-border rounded-md text-foreground px-2.5 py-1.75 text-[12px]">
                 <HardDrive size={11} className="text-primary-deep" />{t}
               </div>
             ))}
@@ -300,7 +300,7 @@ function FlowDiagram() {
           </div>
           <div className="flex flex-col gap-1.5">
             {[['Claude', 'anthropic'], ['GPT', 'openai'], ['Gemini', 'google'], ['Llama', 'meta']].map(([n, p]) => (
-              <div key={n} className="flex items-center justify-between bg-card border border-border rounded-md text-foreground px-2.5 py-[7px] text-[12px]">
+              <div key={n} className="flex items-center justify-between bg-card border border-border rounded-md text-foreground px-2.5 py-1.75 text-[12px]">
                 <span>{n}</span>
                 <span className="font-mono text-muted-foreground text-[10px]">{p}</span>
               </div>
@@ -312,8 +312,8 @@ function FlowDiagram() {
       </div>
 
       <div className="flex justify-center mt-6">
-        <div className="inline-flex items-center gap-2 bg-sidebar border border-dashed border-input rounded-full text-muted-foreground px-3 py-[7px] text-[12px]">
-          <X size={13} className="[color:oklch(0.55_0.18_25)]" />
+        <div className="inline-flex items-center gap-2 bg-sidebar border border-dashed border-input rounded-full text-muted-foreground px-3 py-1.75 text-[12px]">
+          <X size={13} className="text-[oklch(0.55_0.18_25)]" />
           No message database in the middle.
         </div>
       </div>
@@ -324,7 +324,7 @@ function FlowDiagram() {
 function WhyLocal() {
   return (
     <section id="why" className="border-t border-border bg-sidebar">
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-7 py-14 lg:py-[88px]">
+      <div className="mx-auto max-w-300 px-4 sm:px-7 py-14 lg:py-22">
         <div className="grid items-center grid-cols-1 lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-16">
           <div>
             <SectionLabel>Why local</SectionLabel>
@@ -341,7 +341,7 @@ function WhyLocal() {
                 ['Open source', 'Audit it, fork it, run your own copy.'],
               ].map(([h, b]) => (
                 <li key={h} className="flex gap-3 items-start">
-                  <span className="grid place-items-center shrink-0 rounded-full bg-primary-tint border border-primary-ring text-primary-deep mt-0.5 w-[22px] h-[22px]">
+                  <span className="grid place-items-center shrink-0 rounded-full bg-primary-tint border border-primary-ring text-primary-deep mt-0.5 w-5.5 h-5.5">
                     <Check size={12} />
                   </span>
                   <div>
@@ -363,7 +363,7 @@ function ChatExchange({ user, asst, model, provider }: { user: string; asst: str
   return (
     <div className="bg-card border border-border rounded-xl flex flex-col gap-3 p-4">
       <div className="self-end max-w-[85%]">
-        <div className="bg-muted text-foreground rounded-xl px-[13px] py-[9px] text-sm leading-[1.5]">{user}</div>
+        <div className="bg-muted text-foreground rounded-xl px-3.25 py-2.25 text-sm leading-normal">{user}</div>
       </div>
       <div>
         <ModelLine provider={provider} name={model} />
@@ -376,7 +376,7 @@ function ChatExchange({ user, asst, model, provider }: { user: string; asst: str
 function Models() {
   return (
     <section id="models" className="border-t border-border">
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-7 py-14 lg:py-[88px]">
+      <div className="mx-auto max-w-300 px-4 sm:px-7 py-14 lg:py-22">
         <div className="grid items-start grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-10 lg:gap-16">
           <div>
             <SectionLabel>Pick your AI</SectionLabel>
@@ -413,15 +413,15 @@ function How() {
   ];
   return (
     <section id="how" className="border-t border-border bg-sidebar">
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-7 py-14 lg:py-[88px]">
+      <div className="mx-auto max-w-300 px-4 sm:px-7 py-14 lg:py-22">
         <SectionLabel>How it works</SectionLabel>
-        <h2 className="font-semibold text-foreground text-[clamp(28px,3.4vw,44px)] leading-[1.06] tracking-[-0.02em] mt-3.5 mb-10 max-w-[720px]">
+        <h2 className="font-semibold text-foreground text-[clamp(28px,3.4vw,44px)] leading-[1.06] tracking-[-0.02em] mt-3.5 mb-10 max-w-180">
           From open tab to first reply in under a minute.
         </h2>
         <div className="grid bg-card border border-border overflow-hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 rounded-[14px]">
           {steps.map((s, i) => (
-            <div key={s.n} className={`flex flex-col gap-2.5 px-[22px] py-[26px] min-h-[180px] ${i < steps.length - 1 ? 'border-b lg:border-b-0 lg:border-r border-border' : ''}`}>
-              <span className="grid place-items-center font-semibold rounded-full bg-primary-tint border border-primary-ring text-primary-deep w-[26px] h-[26px] text-[13px]">{s.n}</span>
+            <div key={s.n} className={`flex flex-col gap-2.5 px-5.5 py-6.5 min-h-45 ${i < steps.length - 1 ? 'border-b lg:border-b-0 lg:border-r border-border' : ''}`}>
+              <span className="grid place-items-center font-semibold rounded-full bg-primary-tint border border-primary-ring text-primary-deep w-6.5 h-6.5 text-[13px]">{s.n}</span>
               <h3 className="font-semibold text-foreground m-0 text-[17px] tracking-[-0.01em]">{s.t}</h3>
               <p className="text-muted-foreground m-0 text-sm leading-[1.55]">{s.b}</p>
             </div>
@@ -440,9 +440,9 @@ function Reassurance() {
   ];
   return (
     <section className="border-t border-border">
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-7 py-14 lg:py-[88px]">
+      <div className="mx-auto max-w-300 px-4 sm:px-7 py-14 lg:py-22">
         <SectionLabel>How we keep it simple</SectionLabel>
-        <h2 className="font-semibold text-foreground text-[clamp(28px,3.4vw,44px)] leading-[1.06] tracking-[-0.02em] mt-3.5 mb-10 max-w-[720px]">
+        <h2 className="font-semibold text-foreground text-[clamp(28px,3.4vw,44px)] leading-[1.06] tracking-[-0.02em] mt-3.5 mb-10 max-w-180">
           A few things worth knowing.
         </h2>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
@@ -475,7 +475,7 @@ function FAQ() {
   const [open, setOpen] = useState(0);
   return (
     <section id="faq" className="border-t border-border bg-sidebar">
-      <div className="mx-auto max-w-[920px] px-4 sm:px-7 py-14 lg:py-[88px]">
+      <div className="mx-auto max-w-230 px-4 sm:px-7 py-14 lg:py-22">
         <SectionLabel>Common questions</SectionLabel>
         <h2 className="font-semibold text-foreground text-[clamp(28px,3.4vw,44px)] leading-[1.06] tracking-[-0.02em] mt-3.5 mb-8">
           Things people want to know.
@@ -486,13 +486,13 @@ function FAQ() {
               <Button
                 variant="ghost"
                 onClick={() => setOpen(open === i ? -1 : i)}
-                className="w-full justify-between h-auto px-4 sm:px-[22px] py-4 sm:py-[18px] text-base font-medium text-foreground rounded-none"
+                className="w-full justify-between h-auto px-4 sm:px-5.5 py-4 sm:py-4.5 text-base font-medium text-foreground rounded-none"
               >
                 <span>{item.q}</span>
                 <ChevronDown className={`size-4 text-muted-foreground transition-transform duration-200 ${open === i ? 'rotate-180' : ''}`} />
               </Button>
               {open === i && (
-                <div className="text-muted-foreground px-4 sm:px-[22px] pb-4 sm:pb-[18px] text-[15px] leading-[1.6] max-w-[640px]">{item.a}</div>
+                <div className="text-muted-foreground px-4 sm:px-5.5 pb-4 sm:pb-4.5 text-[15px] leading-[1.6] max-w-160">{item.a}</div>
               )}
             </div>
           ))}
@@ -506,12 +506,12 @@ function CTA() {
   return (
     <section id="cta" className="border-t border-border relative overflow-hidden">
       <div aria-hidden className="absolute inset-0 pointer-events-none [background:radial-gradient(circle_at_50%_60%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_60%)]" />
-      <div className="mx-auto relative text-center max-w-[880px] px-4 sm:px-7 py-16 lg:py-24">
+      <div className="mx-auto relative text-center max-w-220 px-4 sm:px-7 py-16 lg:py-24">
         <span className="inline-block mb-4"><Logo size={44} /></span>
-        <h2 className="font-semibold text-foreground text-[clamp(36px,4.6vw,56px)] leading-[1.06] tracking-[-0.025em] mb-4">
+        <h2 className="font-semibold text-foreground text-[clamp(36px,4.6vw,56px)] leading-[1.06] tracking-tight mb-4">
           Try it. It&apos;s just a tab.
         </h2>
-        <p className="text-muted-foreground mx-auto mb-8 text-[18px] leading-[1.55] max-w-[540px]">
+        <p className="text-muted-foreground mx-auto mb-8 text-[18px] leading-[1.55] max-w-135">
           Open the page, start chatting. Add an API key when you want premium models, or don&apos;t. Either way works.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
@@ -526,10 +526,10 @@ function CTA() {
 function Footer() {
   return (
     <footer className="border-t border-border bg-sidebar">
-      <div className="mx-auto flex flex-wrap items-center justify-between gap-4 max-w-[1200px] px-4 sm:px-7 py-9">
+      <div className="mx-auto flex flex-wrap items-center justify-between gap-4 max-w-300 px-4 sm:px-7 py-9">
         <div className="flex items-center gap-3.5">
           <Brand textSize={15} />
-          <span className="text-muted-foreground text-[13px]">Made for people who like their data where they put it.</span>
+          <span className="text-muted-foreground text-[13px] hidden sm:block">Made for people who like their data where they put it.</span>
         </div>
         <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-muted-foreground gap-1.5')}>
           <GithubIcon size={14} /> GitHub
@@ -543,7 +543,7 @@ export default function LandingPage() {
   const { resolvedTheme, setTheme } = useTheme();
   return (
     <div className="min-h-dvh bg-background text-foreground relative">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-[600px] pointer-events-none [background:radial-gradient(ellipse_70%_50%_at_50%_0%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_65%)]" />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-150 pointer-events-none [background:radial-gradient(ellipse_70%_50%_at_50%_0%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_65%)]" />
       <Nav onToggleTheme={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')} />
       <Hero />
       <WhyLocal />
