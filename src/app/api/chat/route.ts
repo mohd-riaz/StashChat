@@ -178,10 +178,11 @@ export async function POST(request: Request): Promise<Response> {
           providerOptions,
           abortSignal: request.signal,
           maxRetries: 0, // we handle retries ourselves
-          onError: ({ error }) => {
-            logError('streamText error', error, { model, attempt, messageCount: messages.length });
-          },
         });
+
+        // Await the initial response so OpenRouter errors throw here (inside the
+        // retry loop) instead of surfacing mid-stream after we've already sent 200.
+        await result.response;
 
         const headers: Record<string, string> = { 'Cache-Control': 'no-store' };
         if (userKey) {
@@ -198,8 +199,9 @@ export async function POST(request: Request): Promise<Response> {
           },
         });
       } catch (err) {
+        if (request.signal.aborted) throw err;
         lastError = err;
-        logError('Attempt failed', err, { attempt, model: guardedModel });
+        logError('Attempt failed', err, { attempt:attempt+1, model: guardedModel });
         if (attempt < MAX_ATTEMPTS - 1) {
           await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
         }
